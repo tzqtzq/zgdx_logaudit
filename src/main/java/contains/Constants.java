@@ -13,6 +13,10 @@ public interface Constants {
     String INDEX_HIVE="hive_logaudit";
     String INDEX_YARN="yarn_logaudit";
 
+    String TOPIC_HDFS="logauditHDFS";
+    String TOPIC_HIVE="logauditHIVE";
+    String TOPIC_YARN="logauditYARN";
+
     /**
      * Project Configuration Constants
      */

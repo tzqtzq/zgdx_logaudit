@@ -24,6 +24,11 @@
     <dependencies>
 
 
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>1.7.20</version>
+        </dependency>
         <!--ES源码依赖-->
         <dependency>
             <groupId>org.elasticsearch</groupId>
@@ -63,10 +68,21 @@
         </dependency>
 
         <!--scala版本log4j依赖-->
+
+        <!--<dependency>-->
+            <!--<groupId>org.apache.logging.log4j</groupId>-->
+            <!--<artifactId>log4j-api-scala_2.11</artifactId>-->
+            <!--<version>11.0</version>-->
+        <!--</dependency>-->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-api-scala_2.11</artifactId>
-            <version>11.0</version>
+            <artifactId>log4j-core</artifactId>
+            <version>2.11.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+            <version>2.11.0</version>
         </dependency>
         <!--&lt;!&ndash; https://mvnrepository.com/artifact/org.apache.spark/spark-streaming-kafka-0-10 &ndash;&gt;-->
         <!--<dependency>-->
@@ -150,6 +166,13 @@
             <artifactId>jedis</artifactId>
             <version>2.9.0</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-pool2 -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-pool2</artifactId>
+            <version>2.3</version>
+        </dependency>
+
 
         <dependency>
             <groupId>mysql</groupId>

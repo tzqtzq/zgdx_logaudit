@@ -1,6 +1,6 @@
 package tools
 
-import entry.HDFS
+import entry.{YARN, HIVE, HDFS}
 import org.apache.spark.{SparkContext, SparkConf}
 import org.apache.spark.sql.SQLContext
 
@@ -20,17 +20,18 @@ object GetConfig {
         .setMaster("yarn")
         .setAppName("底层组件审计日志实时监控平台")
         .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
-        .set("spark.streaming.kafka.maxRatePerPartition","5000")
+        .set("spark.streaming.kafka.maxRatePerPartition","90000")
         .set("spark.sql.shuffle.partitions",partitionSize)
-        .set("es.nodes", "10.142.106.84,10.142.106.85,10.142.106.86")//ES配置
-        .set("es.port", "9200")
-        .set(".es.nodes.wan.only", "true")
+        .set("es.nodes", "NM-402-HW-XH628V3-BIGDATA-2016-303.BIGDATA.CHINATELECOM.CN,NM-402-HW-XH628V3-BIGDATA-2016-302.BIGDATA.CHINATELECOM.CN,NM-402-HW-XH628V3-BIGDATA-2016-301.BIGDATA.CHINATELECOM.CN")//ES配置
+        .set("es.port", "8200")
+        .set("es.nodes.wan.only", "true")
         .set("es.index.auto.create", "true")
-          .registerKryoClasses(Array(classOf[HDFS]))
+//            .set("es.internal.spark.sql.pushdown.strict", "true")
+//            .set("pushdown", "true")
+          .registerKryoClasses(Array(classOf[HDFS],classOf[HIVE],classOf[YARN]))
       }
       instance
     }
-
   }
 
 

@@ -15,6 +15,7 @@ public class IndexBuildingRun {
 
 
         try {
+
 //            Es_BuildIndex.buildIndexMapping(splited[0]+"_logaudit",splited[1]);
             Es_BuildIndex.buildIndexMapping(splited[0]+"_logaudit_test",splited[1]);
             Thread.sleep(3000);

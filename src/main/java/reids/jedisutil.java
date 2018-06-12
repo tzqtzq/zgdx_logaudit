@@ -17,9 +17,11 @@ import java.util.Scanner;
  * @author Administrator
  *
  */
-public class jedisutil {
+public class Jedisutil {
 	// redis ip地址
 	private static String redis_ip = "";
+	//redis密码
+	private static String redis_key = "";
 	// redis 端口号
 	private static int redis_prot = 0;
 	// redis keys文件夹路径
@@ -46,6 +48,7 @@ public class jedisutil {
 			pro.load(new  FileInputStream(new File(file)));
 			redis_ip = pro.getProperty("redis_ip");
 			redis_prot = Integer.parseInt(pro.getProperty("redis_prot"));
+			redis_key = pro.getProperty("redis_key");
 			kyes_path = pro.getProperty("keys_path").replaceAll("\\\\", "/");
 			log_path = pro.getProperty("log_path").replaceAll("\\\\", "/");
 			key_prefix = pro.getProperty("key_prefix");
@@ -63,7 +66,7 @@ public class jedisutil {
 	 * 构建redis连接池
 	 * @return
 	 */
-	public static JedisPool getPool() {
+	public  JedisPool getPool() {
         if (pool == null) {  
             JedisPoolConfig config = new JedisPoolConfig();  
             //控制一个pool可分配多少个jedis实例，通过pool.getResource()来获取；  
@@ -74,8 +77,8 @@ public class jedisutil {
             //表示当borrow(引入)一个jedis实例时，最大的等待时间，如果超过等待时间，则直接抛出JedisConnectionException；  
             config.setMaxWaitMillis(1000 * 15);
             //在borrow一个jedis实例时，是否提前进行validate操作；如果为true，则得到的jedis实例均是可用的；  
-            config.setTestOnBorrow(true);  
-            pool = new JedisPool(config, redis_ip, redis_prot);  
+            config.setTestOnBorrow(true);
+            pool = new JedisPool(config, redis_ip, redis_prot);
         }  
         return pool;  
     }
@@ -96,7 +99,7 @@ public class jedisutil {
 	 * @param key
 	 * @param seconds
 	 */
-	public static void expire(String key, int seconds){
+	public  void expire(String key, int seconds){
 		JedisPool pool = null;
 		Jedis jedis = null;
 		try {
@@ -158,102 +161,102 @@ public class jedisutil {
 	 * @param filePath
 	 * @return key数量
 	 */
-	public static int readFile(String filePath) {
-		int sum = 0;
-		BufferedReader br = null;
-		try {
-			br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(filePath))));
-			String key = "";
-			while ((key = br.readLine()) != null) {
-				if (key.startsWith(key_prefix)) {
-					System.out.println("io: " + key);
-					expire(key, invalid_time);
-					sum ++;
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			if (br != null) {
-				try {
-					br.close();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-		}
-		return sum;
-	}
+//	public static int readFile(String filePath) {
+//		int sum = 0;
+//		BufferedReader br = null;
+//		try {
+//			br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(filePath))));
+//			String key = "";
+//			while ((key = br.readLine()) != null) {
+//				if (key.startsWith(key_prefix)) {
+//					System.out.println("io: " + key);
+//					expire(key, invalid_time);
+//					sum ++;
+//				}
+//			}
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		} finally {
+//			if (br != null) {
+//				try {
+//					br.close();
+//				} catch (IOException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//			}
+//		}
+//		return sum;
+//	}
 	
 	/**
 	 * 扫描方式读取文件，设置redis key 失效时间
 	 * @param filePath
 	 * @return key数量
 	 */
-	public static int scannerReadFile(String filePath) {
-		int sum = 0;
-		FileInputStream inputStream = null;
-		Scanner sc = null;
-		try {
-			inputStream = new FileInputStream(filePath);
-			sc = new Scanner(inputStream, "UTF-8");
-			while (sc.hasNext()) {
-				String key = sc.nextLine();
-				if (key.startsWith(key_prefix)) {
-					System.out.println("scanner: " + key);
-					expire(key, invalid_time);
-					sum ++;
-				}
-			}
-			if (sc.ioException() != null) {
-				throw sc.ioException();
-			}
-		} catch (IOException e){
-			e.printStackTrace();
-		} finally {
-			try {
-				if (inputStream != null)
-					inputStream.close();
-				if (sc != null)
-					sc.close();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		return sum;
-	}
+//	public static int scannerReadFile(String filePath) {
+//		int sum = 0;
+//		FileInputStream inputStream = null;
+//		Scanner sc = null;
+//		try {
+//			inputStream = new FileInputStream(filePath);
+//			sc = new Scanner(inputStream, "UTF-8");
+//			while (sc.hasNext()) {
+//				String key = sc.nextLine();
+//				if (key.startsWith(key_prefix)) {
+//					System.out.println("scanner: " + key);
+//					expire(key, invalid_time);
+//					sum ++;
+//				}
+//			}
+//			if (sc.ioException() != null) {
+//				throw sc.ioException();
+//			}
+//		} catch (IOException e){
+//			e.printStackTrace();
+//		} finally {
+//			try {
+//				if (inputStream != null)
+//					inputStream.close();
+//				if (sc != null)
+//					sc.close();
+//			} catch (IOException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//		}
+//		return sum;
+//	}
 	
 	/**
 	 * 迭代方式读取文件，设置redis key 失效时间
-	 * @param filePath
+//	 * @param filePath
 	 * @return key数量
 	 * @throws Exception 
 	 */
-	public static int lineIteratorReadFile (String filePath) {
-		int sum = 0;
-		LineIterator it = null;
-		try {
-			it = FileUtils.lineIterator(new File(filePath), "UTF-8");
-			while (it.hasNext()) {
-				String key = it.nextLine();
-				if (key.startsWith(key_prefix)) {
-					System.out.println("iterator: " + key);
-					expire(key, invalid_time);
-					sum ++;
-				}
-			}
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return sum;
-		} finally {
-			LineIterator.closeQuietly(it);
-		}
-		return sum;
-	}
-	
+//	public static int lineIteratorReadFile (String filePath) {
+//		int sum = 0;
+//		LineIterator it = null;
+//		try {
+//			it = FileUtils.lineIterator(new File(filePath), "UTF-8");
+//			while (it.hasNext()) {
+//				String key = it.nextLine();
+//				if (key.startsWith(key_prefix)) {
+//					System.out.println("iterator: " + key);
+//					expire(key, invalid_time);
+//					sum ++;
+//				}
+//			}
+//		} catch (Exception e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//			return sum;
+//		} finally {
+//			LineIterator.closeQuietly(it);
+//		}
+//		return sum;
+//	}
+//
 	public static void main(String[] args) {
 		int sum = 0;
 		// 根据存放keys的文件夹路径获取文件夹下的所有key文件
@@ -270,7 +273,7 @@ public class jedisutil {
 						// 2. 消耗内存较小
 //						sum = scannerReadFile(folderPath);
 						// 3. 消耗内存最小
-						sum = lineIteratorReadFile(folderPath);
+//						sum = lineIteratorReadFile(folderPath);
 						// 处理完文件后删除处理成功文件
 						file.delete();
 					}
