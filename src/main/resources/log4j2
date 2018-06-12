@@ -8,7 +8,6 @@
         <File name="FileAppender" fileName="D:/logs/app.log">
             <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n" />
         </File>
-
         <!-- 发现Async 好像PatternLayout的输出格式配置的和输出的格式不一样，不用异步就完全一样  -->
         <Async name="AsyncAppender">
             <AppenderRef ref="FileAppender"/>
