@@ -15,6 +15,7 @@
         </Async>
     </Appenders>
 
+
     <Loggers>
         <Logger name="AsyncFileLogger" level="trace" additivity="true">
             <AppenderRef ref="AsyncAppender" />
