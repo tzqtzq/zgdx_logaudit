@@ -30,72 +30,66 @@ object OfflineLogAuditHHY {
     val logger = LoggerFactory.getLogger(OfflineLogAuditHHY.getClass)
 
     //校检下参数的长度是否符合标准
-      if (args.length != 2) {
+      if (args.length != 3) {
         println("Usage:<inputPath><dataBaseName><userName><password>")
         sys.exit(1)
       }
 
 
-      val config: SparkConf = GetConfig.getsparkConfig("15")
+      val config: SparkConf = GetConfig.getsparkConfig("15",args(1))
       val scc: SQLContext = SQLContextSingleton.getInstance(new SparkContext(config))
 
       import scc.implicits._
 
-      val hdfsDF: DataFrame = scc.esDF(Constants.INDEX_HDFS + "/" + args(0))
-//        .filter(_.getAs[String]("opTime"))
-        .select("userName", "cmd", "ip", "src")
-        .groupBy($"userName", $"cmd", $"ip", $"src").count()
-        .toDF("userName", "cmd", "ip", "src", "count")
+//      val hdfsDF: DataFrame = scc.esDF(Constants.INDEX_HDFS + "/" + args(0))
+////        .filter(_.getAs[String]("opTime"))
+//        .select("userName", "cmd", "ip", "src")
+//        .groupBy($"userName", $"cmd", $"ip", $"src").count()
+//        .toDF("userName", "cmd", "ip", "src", "count")
 
     val hiveDF: DataFrame = scc.esDF(Constants.INDEX_HIVE + "/" + args(0))
         .select("userName", "logType", "ip", "cmd", "db", "tabl")
           .groupBy($"userName", $"logType", $"cmd", $"ip", $"db", $"tabl").count()
       .toDF("userName", "logType", "ip", "cmd", "db", "tabl", "count")
 
-      val yarnDF: DataFrame = scc.esDF(Constants.INDEX_YARN + "/" + args(0))
-  //        .filter(_.getAs[String]("opTime").split(" ")(0).equals(args(1)))
-       .select("userName", "logType", "ip", "operation", "appID",  "result")
-        .groupBy($"userName", $"logType", $"ip", $"operation", $"appID", $"result").count()
-          .toDF("userName", "logType", "ip", "operation", "appID", "result", "count")
+//      hdfsDF.foreachPartition(it => {
 
-      hdfsDF.foreachPartition(it => {
-
-        val conn: Connection = JDBCHelper.getInstance().getConnection
-        val sqlLine = "insert into hdfs_data_test values(?,?,?,?,?,?)"
-        it.foreach(row => {
-
-          val userName = row.getAs[String]("userName")
-          val opTime = new Timestamp(System.currentTimeMillis() - 86400000L)
-          val cmd = row.getAs[String]("cmd")
-          val ip = row.getAs[String]("ip")
-          val src = row.getAs[String]("src")
-          //                val dst=row.getAs[String]("dst")
-          val count = row.getAs[Long]("count")
-          try {
-
-            val ps = conn.prepareStatement(sqlLine)
-            ps.setString(1, userName)
-            ps.setTimestamp(2, opTime)
-            ps.setString(3, cmd)
-            ps.setString(4, ip)
-            ps.setString(5, src)
-            //                  ps.setString(6,dst)
-            ps.setLong(6, count)
-
-            ps.executeUpdate()
-            ps.close()
-
-          } catch {
-            case exception: Exception =>
-              logger.error(exception.getMessage, exception)
-              exception.printStackTrace()
-          }
-
-        })
-        conn.close()
-        logger.info("Yarn的关闭数据库连接")
-      })
-      logger.info("ES中index为 %s 的数据已经被处理完毕存入数据库中",Constants.INDEX_HDFS)
+//        val conn: Connection = JDBCHelper.getInstance().getConnection
+//        val sqlLine = "insert into hdfs_data_test values(?,?,?,?,?,?)"
+//        it.foreach(row => {
+//
+//          val userName = row.getAs[String]("userName")
+//          val opTime = new Timestamp(System.currentTimeMillis() - 86400000L)
+//          val cmd = row.getAs[String]("cmd")
+//          val ip = row.getAs[String]("ip")
+//          val src = row.getAs[String]("src")
+//          //                val dst=row.getAs[String]("dst")
+//          val count = row.getAs[Long]("count")
+//          try {
+//
+//            val ps = conn.prepareStatement(sqlLine)
+//            ps.setString(1, userName)
+//            ps.setTimestamp(2, opTime)
+//            ps.setString(3, cmd)
+//            ps.setString(4, ip)
+//            ps.setString(5, src)
+//            //                  ps.setString(6,dst)
+//            ps.setLong(6, count)
+//
+//            ps.executeUpdate()
+//            ps.close()
+//
+//          } catch {
+//            case exception: Exception =>
+//              logger.error(exception.getMessage, exception)
+//              exception.printStackTrace()
+//          }
+//
+//        })
+//        conn.close()
+//        logger.info("Yarn的关闭数据库连接")
+//      })
+//      logger.info("ES中index为 %s 的数据已经被处理完毕存入数据库中",Constants.INDEX_HDFS)
 
 
     hiveDF.foreachPartition(it => {
@@ -106,7 +100,8 @@ object OfflineLogAuditHHY {
       it.foreach(row => {
 
         val userName = row.getAs[String]("userName")
-        val opTime = new Timestamp(System.currentTimeMillis() - 86400000L)
+//        val opTime = new Timestamp(System.currentTimeMillis() - 86400000L)
+        val opTime=java.sql.Date.valueOf(args(2))
         val logType = row.getAs[String]("logType")
         val ip = row.getAs[String]("ip")
         val cmd = row.getAs[String]("cmd")
@@ -118,7 +113,7 @@ object OfflineLogAuditHHY {
 
           val ps = conn.prepareStatement(sqlLine)
           ps.setString(1, userName)
-          ps.setTimestamp(2, opTime)
+          ps.setDate(2, opTime)
           ps.setString(3, logType)
           ps.setString(4, cmd)
           ps.setString(5, ip)
@@ -138,10 +133,16 @@ object OfflineLogAuditHHY {
 
       })
       conn.close()
-      logger.info("Yarn的关闭数据库连接")
+      logger.info("Hive的关闭数据库连接")
     })
-    logger.info("ES中index为 %d 的数据已经被处理完毕存入数据库中"+Constants.INDEX_HIVE)
+    logger.info("ES中index为 %s 的数据已经被处理完毕存入数据库中",Constants.INDEX_HIVE)
 
+
+    val yarnDF: DataFrame = scc.esDF(Constants.INDEX_YARN + "/" + args(0))
+      //        .filter(_.getAs[String]("opTime").split(" ")(0).equals(args(1)))
+      .select("userName", "logType", "ip", "operation", "appID",  "result")
+      .groupBy($"userName", $"logType", $"ip", $"operation", $"appID", $"result").count()
+      .toDF("userName", "logType", "ip", "operation", "appID", "result", "count")
 
     yarnDF.foreachPartition(it => {
 
@@ -150,7 +151,8 @@ object OfflineLogAuditHHY {
       it.foreach(row => {
 
         val userName = row.getAs[String]("userName")
-        val opTime = new Timestamp(System.currentTimeMillis() - 86400000L)
+        //        val opTime = new Timestamp(System.currentTimeMillis() - 86400000L)
+        val opTime=java.sql.Date.valueOf(args(2))
         val logType = row.getAs[String]("logType")
         val ip = row.getAs[String]("ip")
         val operation = row.getAs[String]("operation")
@@ -163,7 +165,7 @@ object OfflineLogAuditHHY {
 
           val ps = conn.prepareStatement(sqlLine)
           ps.setString(1, userName)
-          ps.setTimestamp(2, opTime)
+          ps.setDate(2, opTime)
           ps.setString(3, logType)
           ps.setString(4, ip)
           ps.setString(5, operation)

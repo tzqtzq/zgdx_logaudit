@@ -26,7 +26,7 @@ object Data2entry {
           line.split("@")(0)
         }
       } else {
-        line.trim
+        line.split(" ")(0)
       }
     } else {
       "EEEEE:Type is not defined"

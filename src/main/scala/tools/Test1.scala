@@ -30,7 +30,7 @@ object Test1 {
 
   def main(args: Array[String]) {
 
-    val config: SparkConf = GetConfig.getsparkConfig("8")
+    val config: SparkConf = GetConfig.getsparkConfig("8",args(0))
     //
         val context: SparkContext = new SparkContext(config)
         val file: RDD[String] = context.textFile("C:\\Users\\tianzhongqiu\\Desktop\\hive.txt")

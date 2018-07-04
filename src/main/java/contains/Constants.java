@@ -30,6 +30,6 @@ public interface Constants {
     /*
     shufflePartitionSize
      */
-    String SIZE_REALTIME="8";
+    String SIZE_REALTIME="40";
     String SIZE_OFFLINE="15";
 }
